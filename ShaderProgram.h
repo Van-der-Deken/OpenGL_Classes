@@ -52,10 +52,9 @@ enum UTypes
 
 class ShaderProgram {
     public:
-        ShaderProgram():program(),/*vertex(0),fragment(0),geometry(0),compute(0),*/ errorStream(std::cerr.rdbuf())
+        ShaderProgram():program(), errorStream(std::cerr.rdbuf())
             {errorLog.resize(1);};
-        ShaderProgram(const std::ostream &inErrorStream):program(),/*vertex(0),fragment(0),geometry(0),compute(0),*/
-                                                   errorStream(inErrorStream.rdbuf())
+        ShaderProgram(const std::ostream &inErrorStream):program(), errorStream(inErrorStream.rdbuf())
             {errorLog.resize(1);};
         ~ShaderProgram();
         bool loadShaderFromFile(const std::string &filePath, GLenum shaderType);
@@ -66,8 +65,10 @@ class ShaderProgram {
         void bindUniformVector(UTypes type, const std::string &uniName, const GLfloat *value, GLsizei count = 1);
         void bindUniformVector(UTypes type, const std::string &uniName, const GLuint *value, GLsizei count = 1);
         void bindUniformVector(UTypes type, const std::string &uniName, const GLint *value, GLsizei count = 1);
-        void bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat* value, GLboolean transpose = GL_TRUE, GLsizei count = 1);
-        void bindAttributeData(const std::string &attribName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
+        void bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat* value,
+                               GLboolean transpose = GL_TRUE, GLsizei count = 1);
+        void bindAttributeData(const std::string &attribName, GLint size, GLenum type, GLboolean normalized,
+                               GLsizei stride, const GLvoid* pointer);
         void disableAttribute(const std::string &name);
         bool link();
         void use();
@@ -80,11 +81,6 @@ class ShaderProgram {
         void assignAttribute(const std::string &name);
 
         PROGRAM_INFO program;
-//        GLuint program;
-//        GLuint vertex;
-//        GLuint geometry;
-//        GLuint fragment;
-//        GLuint compute;
         std::ostream errorStream;
         std::vector<char> errorLog;
         std::map<std::string, GLint> uniforms;
