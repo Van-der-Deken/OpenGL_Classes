@@ -65,6 +65,11 @@ ShaderProgram::~ShaderProgram()
     glUseProgram(0);
 }
 
+void ShaderProgram::setErrorStream(const std::ostream &inErrorStream)
+{
+    errorStream.rdbuf(inErrorStream.rdbuf());
+}
+
 bool ShaderProgram::loadShaderFromFile(const std::string &filePath, GLenum shaderType)
 {
     std::string source = loadFile(filePath);

@@ -57,6 +57,7 @@ class ShaderProgram {
         ShaderProgram(const std::ostream &inErrorStream):program(), errorStream(inErrorStream.rdbuf())
             {errorLog.resize(1);};
         ~ShaderProgram();
+        void setErrorStream(const std::ostream &inErrorStream);
         bool loadShaderFromFile(const std::string &filePath, GLenum shaderType);
         bool loadShaderFromString(const std::string &source, GLenum shaderType);
         void bindUniform(const std::string &uniName, GLfloat v0);
