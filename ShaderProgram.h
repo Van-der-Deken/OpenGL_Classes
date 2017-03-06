@@ -5,11 +5,34 @@
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
 
-
 #include <glew.h>
 #include <vector>
 #include <string>
 #include <map>
+
+struct SHADER_INFO
+{
+    GLuint handle = 0;
+    std::string path = "";
+    GLenum type = GL_SHADER;
+    bool compiled = false;
+    bool attached = false;
+
+    std::string toString();
+};
+
+struct PROGRAM_INFO
+{
+    GLuint handle = 0;
+    SHADER_INFO vertex;
+    SHADER_INFO geometry;
+    SHADER_INFO fragment;
+    SHADER_INFO compute;
+    bool linked = false;
+    bool used = false;
+
+    std::string toString();
+};
 
 enum UTypes
 {
@@ -29,38 +52,39 @@ enum UTypes
 
 class ShaderProgram {
     public:
-        ShaderProgram():program(0),vertex(0),fragment(0),geometry(0),compute(0), errorStream(std::cerr.rdbuf())
+        ShaderProgram():program(),/*vertex(0),fragment(0),geometry(0),compute(0),*/ errorStream(std::cerr.rdbuf())
             {errorLog.resize(1);};
-        ShaderProgram(std::ostream &inErrorStream):program(0),vertex(0),fragment(0),geometry(0),compute(0),
+        ShaderProgram(const std::ostream &inErrorStream):program(),/*vertex(0),fragment(0),geometry(0),compute(0),*/
                                                    errorStream(inErrorStream.rdbuf())
             {errorLog.resize(1);};
         ~ShaderProgram();
-        bool loadShaderFromFile(std::string filePath, GLenum shaderType);
-        bool loadShaderFromString(std::string source, GLenum shaderType);
-        void bindUniform(std::string uniName, GLfloat v0);
-        void bindUniformi(std::string uniName, GLint v0);
-        void bindUniformui(std::string uniName, GLuint v0);
-        void bindUniformVector(UTypes type, std::string uniName, const GLfloat *value, GLsizei count = 1);
-        void bindUniformVector(UTypes type, std::string uniName, const GLuint *value, GLsizei count = 1);
-        void bindUniformVector(UTypes type, std::string uniName, const GLint *value, GLsizei count = 1);
-        void bindUniformMatrix(UTypes type, std::string uniName, const GLfloat* value, GLboolean transpose = GL_TRUE, GLsizei count = 1);
-        void bindAttributeData(std::string attribName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
-        void disableAttribute(std::string name);
+        bool loadShaderFromFile(const std::string &filePath, GLenum shaderType);
+        bool loadShaderFromString(const std::string &source, GLenum shaderType);
+        void bindUniform(const std::string &uniName, GLfloat v0);
+        void bindUniformi(const std::string &uniName, GLint v0);
+        void bindUniformui(const std::string &uniName, GLuint v0);
+        void bindUniformVector(UTypes type, const std::string &uniName, const GLfloat *value, GLsizei count = 1);
+        void bindUniformVector(UTypes type, const std::string &uniName, const GLuint *value, GLsizei count = 1);
+        void bindUniformVector(UTypes type, const std::string &uniName, const GLint *value, GLsizei count = 1);
+        void bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat* value, GLboolean transpose = GL_TRUE, GLsizei count = 1);
+        void bindAttributeData(const std::string &attribName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
+        void disableAttribute(const std::string &name);
         bool link();
         void use();
         void unuse();
         void printError();
-        GLuint getHandle();
+        PROGRAM_INFO getProgramInfo();
     private:
-        std::string loadFile(std::string filePath);
-        void assignUniform(std::string name);
-        void assignAttribute(std::string name);
+        std::string loadFile(const std::string &filePath);
+        void assignUniform(const std::string &name);
+        void assignAttribute(const std::string &name);
 
-        GLuint program;
-        GLuint vertex;
-        GLuint geometry;
-        GLuint fragment;
-        GLuint compute;
+        PROGRAM_INFO program;
+//        GLuint program;
+//        GLuint vertex;
+//        GLuint geometry;
+//        GLuint fragment;
+//        GLuint compute;
         std::ostream errorStream;
         std::vector<char> errorLog;
         std::map<std::string, GLint> uniforms;

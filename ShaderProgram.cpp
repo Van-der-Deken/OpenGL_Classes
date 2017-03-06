@@ -4,73 +4,124 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "ShaderProgram.h"
+
+std::string SHADER_INFO::toString()
+{
+    std::stringstream stringStream;
+    stringStream << "Shader info:\n"
+                 << "\tHandle:" << handle
+                 << "\n\tPath to file with source:" << path.c_str()
+                 << "\n\tShader type:";
+    switch (type)
+    {
+        case GL_VERTEX_SHADER:
+            stringStream << "Vertex shader\n";
+            break;
+        case GL_GEOMETRY_SHADER:
+            stringStream << "Geometry shader\n";
+            break;
+        case GL_FRAGMENT_SHADER:
+            stringStream << "Fragment shader\n";
+            break;
+        case GL_COMPUTE_SHADER:
+            stringStream << "Compute shader\n";
+            break;
+        default:
+            stringStream << "Undefined\n";
+    }
+    stringStream << "\tCompiled:" << compiled
+                 << "\n\tAttached:" << attached << std::endl;
+    return stringStream.str();
+}
+
+std::string PROGRAM_INFO::toString()
+{
+    std::stringstream stringStream;
+    stringStream << "Program info:"
+                 << "\n   " << vertex.toString().c_str()
+                 << "\n   " << geometry.toString().c_str()
+                 << "\n   " << fragment.toString().c_str()
+                 << "\n   " << compute.toString().c_str()
+                 << "\n      Handle:" << handle
+                 << "\n      Linked:" << linked
+                 << "\n      Used:" << used << std::endl;
+    return stringStream.str();
+}
 
 ShaderProgram::~ShaderProgram()
 {
-    if(vertex != 0)
-        glDeleteShader(vertex);
-    if(geometry != 0)
-        glDeleteShader(geometry);
-    if(fragment != 0)
-        glDeleteShader(fragment);
-    if(compute != 0)
-        glDeleteShader(compute);
-    if(program != 0)
-        glDeleteProgram(program);
+    if(program.vertex.handle != 0)
+        glDeleteShader(program.vertex.handle);
+    if(program.geometry.handle != 0)
+        glDeleteShader(program.geometry.handle);
+    if(program.fragment.handle != 0)
+        glDeleteShader(program.fragment.handle);
+    if(program.compute.handle != 0)
+        glDeleteShader(program.compute.handle);
+    if(program.handle != 0)
+        glDeleteProgram(program.handle);
     glUseProgram(0);
 }
 
-bool ShaderProgram::loadShaderFromFile(std::string filePath, GLenum shaderType)
+bool ShaderProgram::loadShaderFromFile(const std::string &filePath, GLenum shaderType)
 {
     std::string source = loadFile(filePath);
     if(source.empty())
         return false;
+    switch (shaderType)
+    {
+        case GL_VERTEX_SHADER:
+            program.vertex.path = filePath;
+            break;
+        case GL_GEOMETRY_SHADER:
+            program.geometry.path = filePath;
+            break;
+        case GL_FRAGMENT_SHADER:
+            program.fragment.path = filePath;
+            break;
+        case GL_COMPUTE_SHADER:
+            program.compute.path = filePath;
+            break;
+    }
     return loadShaderFromString(source, shaderType);
 }
 
-bool ShaderProgram::loadShaderFromString(std::string source, GLenum shaderType)
+bool ShaderProgram::loadShaderFromString(const std::string &source, GLenum shaderType)
 {
     const char* cSource = source.c_str();
     GLint result = GL_FALSE;
     int logLength;
+
+    SHADER_INFO shader;
+    shader.handle = glCreateShader(shaderType);
+    shader.type = shaderType;
+    glShaderSource(shader.handle, 1, &cSource, NULL);
+    glCompileShader(shader.handle);
+    glGetShaderiv(shader.handle, GL_COMPILE_STATUS, &result);
+    shader.compiled = result == GL_TRUE;
+    glGetShaderiv(shader.handle, GL_INFO_LOG_LENGTH, &logLength);
+    errorLog.resize(logLength);
+    glGetShaderInfoLog(shader.handle, logLength, NULL, &errorLog[0]);
+
     switch (shaderType)
     {
         case GL_VERTEX_SHADER:
-            vertex = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vertex, 1, &cSource, NULL);
-            glCompileShader(vertex);
-            glGetShaderiv(vertex, GL_COMPILE_STATUS, &result);
-            glGetShaderiv(vertex, GL_INFO_LOG_LENGTH, &logLength);
-            errorLog.resize(logLength);
-            glGetShaderInfoLog(vertex, logLength, NULL, &errorLog[0]);
+            shader.path = program.vertex.path;
+            program.vertex = shader;
             break;
         case GL_FRAGMENT_SHADER:
-            fragment = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fragment, 1, &cSource, NULL);
-            glCompileShader(fragment);
-            glGetShaderiv(fragment, GL_COMPILE_STATUS, &result);
-            glGetShaderiv(fragment, GL_INFO_LOG_LENGTH, &logLength);
-            errorLog.resize(logLength);
-            glGetShaderInfoLog(fragment, logLength, NULL, &errorLog[0]);
+            shader.path = program.fragment.path;
+            program.fragment = shader;
             break;
         case GL_GEOMETRY_SHADER:
-            geometry = glCreateShader(GL_GEOMETRY_SHADER);
-            glShaderSource(geometry, 1, &cSource, NULL);
-            glCompileShader(geometry);
-            glGetShaderiv(geometry, GL_COMPILE_STATUS, &result);
-            glGetShaderiv(geometry, GL_INFO_LOG_LENGTH, &logLength);
-            errorLog.resize(logLength);
-            glGetShaderInfoLog(geometry, logLength, NULL, &errorLog[0]);
+            shader.path = program.geometry.path;
+            program.geometry = shader;
             break;
         case GL_COMPUTE_SHADER:
-            compute = glCreateShader(GL_COMPUTE_SHADER);
-            glShaderSource(compute, 1, &cSource, NULL);
-            glCompileShader(compute);
-            glGetShaderiv(compute, GL_COMPILE_STATUS, &result);
-            glGetShaderiv(compute, GL_INFO_LOG_LENGTH, &logLength);
-            errorLog.resize(logLength);
-            glGetShaderInfoLog(compute, logLength, NULL, &errorLog[0]);
+            shader.path = program.compute.path;
+            program.compute = shader;
             break;
         default:
             errorStream << shaderType << ":unsupported type of shader\n";
@@ -79,28 +130,28 @@ bool ShaderProgram::loadShaderFromString(std::string source, GLenum shaderType)
     return result == GL_TRUE;
 }
 
-void ShaderProgram::bindUniform(std::string uniName, GLfloat v0)
+void ShaderProgram::bindUniform(const std::string &uniName, GLfloat v0)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
     glUniform1f(uniforms[uniName], v0);
 }
 
-void ShaderProgram::bindUniformi(std::string uniName, int v0)
+void ShaderProgram::bindUniformi(const std::string &uniName, int v0)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
     glUniform1i(uniforms[uniName], v0);
 }
 
-void ShaderProgram::bindUniformui(std::string uniName, uint32_t v0)
+void ShaderProgram::bindUniformui(const std::string &uniName, uint32_t v0)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
     glUniform1ui(uniforms[uniName], v0);
 }
 
-void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GLfloat *value, GLsizei count)
+void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, const GLfloat *value, GLsizei count)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
@@ -120,7 +171,7 @@ void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GL
     }
 }
 
-void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GLuint *value, GLsizei count)
+void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, const GLuint *value, GLsizei count)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
@@ -140,7 +191,7 @@ void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GL
     }
 }
 
-void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GLint *value, GLsizei count)
+void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, const GLint *value, GLsizei count)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
@@ -160,8 +211,8 @@ void ShaderProgram::bindUniformVector(UTypes type, std::string uniName, const GL
     }
 }
 
-void ShaderProgram::bindUniformMatrix(UTypes type, std::string uniName, const GLfloat *value, GLboolean transpose,
-                                      GLsizei count)
+void ShaderProgram::bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat *value,
+                                      GLboolean transpose, GLsizei count)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
@@ -181,8 +232,8 @@ void ShaderProgram::bindUniformMatrix(UTypes type, std::string uniName, const GL
     }
 }
 
-void ShaderProgram::bindAttributeData(std::string attribName, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
-                                      const GLvoid *pointer)
+void ShaderProgram::bindAttributeData(const std::string &attribName, GLint size, GLenum type, GLboolean normalized,
+                                      GLsizei stride, const GLvoid *pointer)
 {
     if(attributes.count(attribName) == 0)
         assignAttribute(attribName);
@@ -190,39 +241,54 @@ void ShaderProgram::bindAttributeData(std::string attribName, GLint size, GLenum
     glVertexAttribPointer(attributes[attribName], size, type, normalized, stride, pointer);
 }
 
-void ShaderProgram::disableAttribute(std::string name)
+void ShaderProgram::disableAttribute(const std::string &name)
 {
     glDisableVertexAttribArray(attributes[name]);
 }
 
 bool ShaderProgram::link()
 {
-    program = glCreateProgram();
-    if(vertex != 0)
-        glAttachShader(program, vertex);
-    if(fragment != 0)
-        glAttachShader(program, fragment);
-    if(geometry != 0)
-        glAttachShader(program, geometry);
-    if(compute != 0)
-        glAttachShader(program, compute);
-    glLinkProgram(program);
+    program.handle = glCreateProgram();
+    if(program.vertex.handle != 0)
+    {
+        glAttachShader(program.handle, program.vertex.handle);
+        program.vertex.attached = true;
+    }
+    if(program.fragment.handle != 0)
+    {
+        glAttachShader(program.handle, program.fragment.handle);
+        program.fragment.attached = true;
+    }
+    if(program.geometry.handle != 0)
+    {
+        glAttachShader(program.handle, program.geometry.handle);
+        program.geometry.attached = true;
+    }
+    if(program.compute.handle != 0)
+    {
+        glAttachShader(program.handle, program.compute.handle);
+    }
+    glLinkProgram(program.handle);
     GLint result;
     int logLength;
-    glGetProgramiv(program, GL_LINK_STATUS, &result);
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-    glGetProgramInfoLog(program, logLength, NULL, &errorLog[0]);
+    glGetProgramiv(program.handle, GL_LINK_STATUS, &result);
+    program.linked = true;
+    glGetProgramiv(program.handle, GL_INFO_LOG_LENGTH, &logLength);
+    glGetProgramInfoLog(program.handle, logLength, NULL, &errorLog[0]);
     return result == GL_TRUE;
 }
 
+
 void ShaderProgram::use()
 {
-    glUseProgram(program);
+    glUseProgram(program.handle);
+    program.used = true;
 }
 
 void ShaderProgram::unuse()
 {
     glUseProgram(0);
+    program.used = false;
 }
 
 void ShaderProgram::printError()
@@ -232,12 +298,12 @@ void ShaderProgram::printError()
     errorLog.clear();
 }
 
-GLuint ShaderProgram::getHandle()
+PROGRAM_INFO ShaderProgram::getProgramInfo()
 {
     return program;
 }
 
-std::string ShaderProgram::loadFile(std::string filePath)
+std::string ShaderProgram::loadFile(const std::string &filePath)
 {
     std::string content;
     std::ifstream fileStream(filePath, std::ios::in);
@@ -257,14 +323,14 @@ std::string ShaderProgram::loadFile(std::string filePath)
     return content;
 }
 
-void ShaderProgram::assignUniform(std::string name)
+void ShaderProgram::assignUniform(const std::string &name)
 {
-    GLint uniform = glGetUniformLocation(program, name.c_str());
+    GLint uniform = glGetUniformLocation(program.handle, name.c_str());
     uniforms[name] = uniform;
 }
 
-void ShaderProgram::assignAttribute(std::string name)
+void ShaderProgram::assignAttribute(const std::string &name)
 {
-    GLint attribute = glGetAttribLocation(program, name.c_str());
+    GLint attribute = glGetAttribLocation(program.handle, name.c_str());
     attributes[name] = attribute;
 }
