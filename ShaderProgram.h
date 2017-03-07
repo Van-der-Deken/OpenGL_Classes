@@ -18,7 +18,7 @@ struct SHADER_INFO
     bool compiled = false;
     bool attached = false;
 
-    std::string toString();
+    std::string toString() const;
 };
 
 struct PROGRAM_INFO
@@ -31,7 +31,7 @@ struct PROGRAM_INFO
     bool linked = false;
     bool used = false;
 
-    std::string toString();
+    std::string toString() const;
 };
 
 enum UTypes
@@ -56,7 +56,6 @@ class ShaderProgram {
             {errorLog.resize(1);};
         ShaderProgram(const std::ostream &inErrorStream):program(), errorStream(inErrorStream.rdbuf())
             {errorLog.resize(1);};
-        ~ShaderProgram();
         void setErrorStream(const std::ostream &inErrorStream);
         bool loadShaderFromFile(const std::string &filePath, GLenum shaderType);
         bool loadShaderFromString(const std::string &source, GLenum shaderType);
@@ -75,7 +74,8 @@ class ShaderProgram {
         void use();
         void unuse();
         void printError();
-        PROGRAM_INFO getProgramInfo();
+        void deleteProgram();
+        PROGRAM_INFO getProgramInfo() const;
     private:
         std::string loadFile(const std::string &filePath);
         void assignUniform(const std::string &name);

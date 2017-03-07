@@ -7,7 +7,7 @@
 #include <sstream>
 #include "ShaderProgram.h"
 
-std::string SHADER_INFO::toString()
+std::string SHADER_INFO::toString() const
 {
     std::stringstream stringStream;
     stringStream << "Shader info:\n"
@@ -36,7 +36,7 @@ std::string SHADER_INFO::toString()
     return stringStream.str();
 }
 
-std::string PROGRAM_INFO::toString()
+std::string PROGRAM_INFO::toString() const
 {
     std::stringstream stringStream;
     stringStream << "Program info:"
@@ -48,21 +48,6 @@ std::string PROGRAM_INFO::toString()
                  << "\n      Linked:" << linked
                  << "\n      Used:" << used << std::endl;
     return stringStream.str();
-}
-
-ShaderProgram::~ShaderProgram()
-{
-    if(program.vertex.handle != 0)
-        glDeleteShader(program.vertex.handle);
-    if(program.geometry.handle != 0)
-        glDeleteShader(program.geometry.handle);
-    if(program.fragment.handle != 0)
-        glDeleteShader(program.fragment.handle);
-    if(program.compute.handle != 0)
-        glDeleteShader(program.compute.handle);
-    if(program.handle != 0)
-        glDeleteProgram(program.handle);
-    glUseProgram(0);
 }
 
 void ShaderProgram::setErrorStream(const std::ostream &inErrorStream)
@@ -303,7 +288,22 @@ void ShaderProgram::printError()
     errorLog.clear();
 }
 
-PROGRAM_INFO ShaderProgram::getProgramInfo()
+void ShaderProgram::deleteProgram()
+{
+    if(program.vertex.handle != 0)
+        glDeleteShader(program.vertex.handle);
+    if(program.geometry.handle != 0)
+        glDeleteShader(program.geometry.handle);
+    if(program.fragment.handle != 0)
+        glDeleteShader(program.fragment.handle);
+    if(program.compute.handle != 0)
+        glDeleteShader(program.compute.handle);
+    if(program.handle != 0)
+        glDeleteProgram(program.handle);
+    glUseProgram(0);
+}
+
+PROGRAM_INFO ShaderProgram::getProgramInfo() const
 {
     return program;
 }
