@@ -13,9 +13,9 @@
 struct GLBUFFER_INFO
 {
     GLuint handle = 0;
-    GLenum type = GL_BUFFER;
-    GLenum usage = GL_BUFFER_USAGE;
-    GLenum access = GL_BUFFER_ACCESS;
+    GLenum type = 0;
+    GLenum usage = 0;
+    GLenum access = 0;
     GLbitfield accessBit = 0;
     GLsizeiptr size = 0;
     GLuint baseIndex = 0;

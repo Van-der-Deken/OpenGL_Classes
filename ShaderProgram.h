@@ -14,7 +14,7 @@ struct SHADER_INFO
 {
     GLuint handle = 0;
     std::string path = "";
-    GLenum type = GL_SHADER;
+    GLenum type = 0;
     bool compiled = false;
     bool attached = false;
 
