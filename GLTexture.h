@@ -29,7 +29,7 @@ struct GLTEXTURE_INFO
 
 class GLTexture {
     public:
-        GLTexture() : errorStream(std::cerr.rdbuf()){};
+        GLTexture() : errorStream(std::cerr.rdbuf()){glGenTextures(1, &texture.handle);};
         GLTexture(GLenum type, const std::ostream &inErrorStream = std::cerr);
         void setType(GLenum type);
         void setErrorStream(const std::ostream &inErrorStream);
@@ -40,15 +40,18 @@ class GLTexture {
         void specifyImage(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth,
                           GLint border, GLenum format, GLenum type, const GLvoid *data);
         void parameter(GLenum pname, GLint param);
-        void parameter(GLenum pname, GLuint param);
         void parameter(GLenum pname, GLfloat param);
         void subImage(GLint level, GLint xoffset, GLsizei width, const GLvoid *data);
         void subImage(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, const GLvoid *data);
         void subImage(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height,
                       GLsizei depth, const GLvoid *data);
-        void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access);
+        void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
         void getSubImage(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height,
                          GLsizei depth, GLsizei bufSize, void *pixels);
+        void bind();
+        void unbind();
+        void deleteTexture();
+        GLTEXTURE_INFO getTextureInfo();
     private:
         GLTEXTURE_INFO texture;
         std::ostream errorStream;

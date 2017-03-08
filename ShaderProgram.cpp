@@ -301,6 +301,8 @@ void ShaderProgram::deleteProgram()
     if(program.handle != 0)
         glDeleteProgram(program.handle);
     glUseProgram(0);
+    PROGRAM_INFO empty;
+    program = empty;
 }
 
 PROGRAM_INFO ShaderProgram::getProgramInfo() const

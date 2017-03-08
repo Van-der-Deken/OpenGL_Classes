@@ -126,7 +126,6 @@ GLBuffer::GLBuffer(const GLBuffer &origin) : errorStream(origin.errorStream.rdbu
 
 void GLBuffer::setType(GLenum type)
 {
-    glGenBuffers(1, &buffer.handle);
     buffer.type = type;
 }
 
@@ -205,6 +204,8 @@ void GLBuffer::deleteBuffer()
     {
         glDeleteBuffers(1, &buffer.handle);
         glBindBuffer(buffer.type, 0);
+        GLBUFFER_INFO empty;
+        buffer = empty;
     }
 }
 

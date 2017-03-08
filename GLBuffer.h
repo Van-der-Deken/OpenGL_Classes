@@ -27,7 +27,7 @@ struct GLBUFFER_INFO
 
 class GLBuffer {
     public:
-        GLBuffer():errorStream(std::cerr.rdbuf()){};
+        GLBuffer():errorStream(std::cerr.rdbuf()){glGenBuffers(1, &buffer.handle);};
         GLBuffer(GLenum type, const std::ostream &inErrorStream = std::cerr);
         GLBuffer(const GLBuffer &origin);
         void setType(GLenum type);
