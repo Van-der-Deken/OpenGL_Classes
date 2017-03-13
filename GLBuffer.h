@@ -5,7 +5,7 @@
 #ifndef GLBUFFER_H
 #define GLBUFFER_H
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <string>
 #include <ostream>
 #include <iostream>

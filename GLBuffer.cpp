@@ -171,7 +171,7 @@ GLboolean GLBuffer::unmap()
 {
     buffer.access = GL_BUFFER_ACCESS;
     buffer.mapped = false;
-    glUnmapBuffer(buffer.type);
+    return glUnmapBuffer(buffer.type);
 }
 
 void* GLBuffer::mapRange(GLintptr offset, GLsizeiptr length, GLbitfield access)

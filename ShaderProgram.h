@@ -5,7 +5,7 @@
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <vector>
 #include <string>
 #include <map>

@@ -5,7 +5,7 @@
 #ifndef CONVERTER_GLTEXTURE_H
 #define CONVERTER_GLTEXTURE_H
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <string>
 #include <ostream>
 #include <iostream>
