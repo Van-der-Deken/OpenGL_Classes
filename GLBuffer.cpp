@@ -126,6 +126,7 @@ GLBuffer::GLBuffer(const GLBuffer &origin) : errorStream(origin.errorStream.rdbu
 
 void GLBuffer::setType(GLenum type)
 {
+    glGenBuffers(1, &buffer.handle);
     buffer.type = type;
 }
 
