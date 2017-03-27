@@ -127,18 +127,25 @@ void ShaderProgram::bindUniform(const std::string &uniName, GLfloat v0)
     glUniform1f(uniforms[uniName], v0);
 }
 
-void ShaderProgram::bindUniformi(const std::string &uniName, int v0)
+void ShaderProgram::bindUniformi(const std::string &uniName, GLint v0)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
     glUniform1i(uniforms[uniName], v0);
 }
 
-void ShaderProgram::bindUniformui(const std::string &uniName, uint32_t v0)
+void ShaderProgram::bindUniformui(const std::string &uniName, GLuint v0)
 {
     if(uniforms.count(uniName) == 0)
         assignUniform(uniName);
     glUniform1ui(uniforms[uniName], v0);
+}
+
+void ShaderProgram::bindUniformd(const std::string &uniName, GLdouble v0)
+{
+    if(uniforms.count(uniName) == 0)
+        assignUniform(uniName);
+    glUniform1d(uniforms[uniName], v0);
 }
 
 void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, const GLfloat *value, GLsizei count)
@@ -201,6 +208,26 @@ void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, c
     }
 }
 
+void ShaderProgram::bindUniformVector(UTypes type, const std::string &uniName, const GLdouble *value, GLsizei count)
+{
+    if(uniforms.count(uniName) == 0)
+        assignUniform(uniName);
+    switch (type)
+    {
+        case SP_DVEC2:
+            glUniform2dv(uniforms[uniName], count, value);
+            break;
+        case SP_DVEC3:
+            glUniform3dv(uniforms[uniName], count, value);
+            break;
+        case SP_DVEC4:
+            glUniform4dv(uniforms[uniName], count, value);
+            break;
+        default:
+            errorStream << "Wrong type of uniform\n";
+    }
+}
+
 void ShaderProgram::bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat *value,
                                       GLboolean transpose, GLsizei count)
 {
@@ -229,6 +256,15 @@ void ShaderProgram::bindAttributeData(const std::string &attribName, GLint size,
         assignAttribute(attribName);
     glEnableVertexAttribArray(attributes[attribName]);
     glVertexAttribPointer(attributes[attribName], size, type, normalized, stride, pointer);
+}
+
+void ShaderProgram::bindAttributeLData(const std::string &attribName, GLint size, GLenum type, GLsizei stride,
+                                       const GLvoid *pointer)
+{
+    if(attributes.count(attribName) == 0)
+        assignAttribute(attribName);
+    glEnableVertexAttribArray(attributes[attribName]);
+    glVertexAttribLPointer(attributes[attribName], size, type, stride, pointer);
 }
 
 void ShaderProgram::disableAttribute(const std::string &name)

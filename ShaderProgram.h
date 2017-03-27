@@ -45,9 +45,15 @@ enum UTypes
     SP_UVEC2,
     SP_UVEC3,
     SP_UVEC4,
+    SP_DVEC2,
+    SP_DVEC3,
+    SP_DVEC4,
     SP_MAT2,
     SP_MAT3,
     SP_MAT4,
+    SP_DMAT2,
+    SP_DMAT3,
+    SP_DMAT4
 };
 
 class ShaderProgram {
@@ -62,13 +68,17 @@ class ShaderProgram {
         void bindUniform(const std::string &uniName, GLfloat v0);
         void bindUniformi(const std::string &uniName, GLint v0);
         void bindUniformui(const std::string &uniName, GLuint v0);
+        void bindUniformd(const std::string &uniName, GLdouble v0);
         void bindUniformVector(UTypes type, const std::string &uniName, const GLfloat *value, GLsizei count = 1);
         void bindUniformVector(UTypes type, const std::string &uniName, const GLuint *value, GLsizei count = 1);
         void bindUniformVector(UTypes type, const std::string &uniName, const GLint *value, GLsizei count = 1);
+        void bindUniformVector(UTypes type, const std::string &uniName, const GLdouble *value, GLsizei count = 1);
         void bindUniformMatrix(UTypes type, const std::string &uniName, const GLfloat* value,
                                GLboolean transpose = GL_TRUE, GLsizei count = 1);
         void bindAttributeData(const std::string &attribName, GLint size, GLenum type, GLboolean normalized,
                                GLsizei stride, const GLvoid* pointer);
+        void bindAttributeLData(const std::string &attribName, GLint size, GLenum type, GLsizei stride,
+                                const GLvoid* pointer);
         void disableAttribute(const std::string &name);
         bool link();
         void use();
