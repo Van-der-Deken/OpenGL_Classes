@@ -29,8 +29,9 @@ struct GLTEXTURE_INFO
 
 class GLTexture {
     public:
-        GLTexture() : errorStream(std::cerr.rdbuf()){glGenTextures(1, &texture.handle);};
+        GLTexture() : errorStream(std::cerr.rdbuf()){};
         GLTexture(GLenum type, const std::ostream &inErrorStream = std::cerr);
+        GLTexture(const GLTexture &origin);
         void setType(GLenum type);
         void setErrorStream(const std::ostream &inErrorStream);
         void specifyImage(GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format,
@@ -52,6 +53,7 @@ class GLTexture {
         void unbind();
         void deleteTexture();
         GLTEXTURE_INFO getTextureInfo();
+        GLTexture& operator=(const GLTexture& rValue);
     private:
         GLTEXTURE_INFO texture;
         std::ostream errorStream;

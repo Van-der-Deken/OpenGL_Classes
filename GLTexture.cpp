@@ -81,8 +81,14 @@ GLTexture::GLTexture(GLenum type, const std::ostream &inErrorStream) : errorStre
     texture.type = type;
 }
 
+GLTexture::GLTexture(const GLTexture &origin) : errorStream(origin.errorStream.rdbuf())
+{
+    texture = origin.texture;
+}
+
 void GLTexture::setType(GLenum type)
 {
+    glGenTextures(1, &texture.handle);
     texture.type = type;
 }
 
@@ -188,4 +194,10 @@ void GLTexture::deleteTexture()
 GLTEXTURE_INFO GLTexture::getTextureInfo()
 {
     return texture;
+}
+
+GLTexture& GLTexture::operator=(const GLTexture &rValue)
+{
+    texture = rValue.texture;
+    errorStream.rdbuf(rValue.errorStream.rdbuf());
 }
